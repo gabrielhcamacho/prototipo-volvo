@@ -166,7 +166,7 @@ WEB['web-jogos'] = () => {
 WEB['web-ranking'] = () => {
   S.wr = S.wr || 0;
   const rows = RANK_PLAYERS.map(([n, p]) => ({ n, p, t: p.reduce((a, x) => a + ptsFor(x), 0), e: p.filter(Boolean).length })).sort((a, b) => b.t - a.t);
-  const pos = i => i < 3 ? medal(12, ['gold', 'silver', 'bronze'][i], '#003057', '#C8F04A') : `<span class="mut num">${i + 1}</span>`;
+  const pos = i => `<span class="posn num ${['p1', 'p2', 'p3'][i] || ''}">${i + 1}</span>`;
   return `
   ${whead(['Gestão'], 'Classificação', wb(flash('pub', 'Publicar no app', 'Publicado no app'), 'data-act="publish-rank"', S.flash === 'pub' ? 'sec' : 'pri', S.flash === 'pub' ? 'check' : 'upload'))}
   <div class="cpick" role="tablist" aria-label="Campeonato">${[['tru', 'tru', 'Ranking de Truco 2027', '3 de 10 etapas'], ['fut', 'fut', 'Copa Futebol Society 2027', 'Semifinais'], ['vol', 'vol', 'Vôlei Misto 2027', 'Inscrições abertas']].map(([k, m, t, s]) => `<button role="tab" aria-selected="${S.rc === k}" class="${S.rc === k ? 'on' : ''}" data-act="rc" data-v="${k}">${BALL[m](28)}<span><b>${t}</b><small>${s}</small></span></button>`).join('')}</div>
@@ -209,10 +209,14 @@ function webFrame(id) {
 const ST_LBL = { run: 'Em andamento', open: 'Inscrições abertas', done: 'Encerrado' };
 const chipSt = st => `<span class="chip chip-${st}">${ST_LBL[st]}</span>`;
 const campSteps = c => `<ol class="csteps">${c.steps.map((s, i) => `<li class="${i < c.at ? 'ok' : i === c.at ? 'now' : ''}"><span>${i < c.at ? ic('check', 12, 3) : i + 1}</span>${s}</li>`).join('')}</ol>`;
+const MODPH = { fut: 'ball', vol: 'volley', tru: 'cards' };
 function campHead(id, tab, acts = '') {
   const c = CAMPS[id]; S.wc = id;
   return `${crumb(['Campeonatos', c.n])}
-  <div class="chead"><span class="cball">${BALL[c.mod](44)}</span><div class="cm"><div class="ct"><h1>${c.n}</h1>${chipSt(c.st)}</div><span>${c.info} · ${c.fase}</span></div><div class="acts">${acts}</div></div>
+  <section class="ch2"><span class="hph" style="background-image:url(${DIMG[MODPH[c.mod]]})"></span>
+    <div class="ch2-top"><div class="ch2-t"><span class="ch2-k">${MOD[c.mod] ? MOD[c.mod].n || '' : ''}</span><h1>${c.n}</h1><span class="ch2-i">${c.info} · ${c.fase}</span></div><div class="acts">${acts}</div></div>
+    <ol class="ch2-steps">${c.steps.map((s, k) => `<li class="${k < c.at ? 'ok' : k === c.at ? 'now' : ''}"><i></i><span>${s}</span></li>`).join('')}<li class="ch2-st">${chipSt(c.st)}</li></ol>
+  </section>
   <div class="wtabs ctabs" role="tablist">${c.tabs.map(([k, t]) => `<button role="tab" aria-selected="${tab === k}" class="${tab === k ? 'on' : ''}" data-act="camp-tab" data-c="${id}" data-v="${k}">${t}</button>`).join('')}</div>`;
 }
 const gTable = (k, rows, small) => `<section class="panel"><h2 style="margin-bottom:12px">Grupo ${k}</h2><table class="wt ${small ? 'sm' : ''}"><thead><tr><th scope="col" style="width:28px">#</th><th scope="col">Equipe</th><th class="n" scope="col">J</th><th class="n" scope="col">V</th><th class="n" scope="col">E</th><th class="n" scope="col">D</th><th class="n" scope="col">SG</th><th class="n" scope="col">Pts</th></tr></thead><tbody>
@@ -241,10 +245,10 @@ const classFut = () => `<div class="g2">${gTable('A', FUT_GROUPS.A)}${gTable('B'
 function classVol() {
   return `<section class="panel empty-st">${ic('clock', 28, 1.6)}<div><h2>A classificação começa com o primeiro jogo</h2><p class="pd" style="margin:4px 0 0">Inscrições até 28 mai. Rodízio a partir de 05 jun. Enquanto isso, o resultado da edição passada.</p></div></section>
   <section class="panel"><h2 style="margin-bottom:12px">Vôlei Misto 2026 · resultado final</h2><table class="wt"><thead><tr><th scope="col" style="width:40px">#</th><th scope="col">Equipe</th><th class="n" scope="col">Vitórias</th><th class="n" scope="col">Derrotas</th><th class="n" scope="col">Sets vencidos</th></tr></thead><tbody>
-  ${VOL_2026.map((r, i) => `<tr><td>${i < 3 ? medal(12, ['gold', 'silver', 'bronze'][i], '#003057', '#C8F04A') : `<span class="mut num">${i + 1}</span>`}</td><td><span class="pcell">${cr(r[0], 22)}${T[r[0]].n}</span></td><td class="n" style="font-weight:600">${r[1]}</td><td class="n">${r[2]}</td><td class="n">${r[3]}</td></tr>`).join('')}</tbody></table></section>`;
+  ${VOL_2026.map((r, i) => `<tr><td>${medalPos(i)}</td><td><span class="pcell">${cr(r[0], 22)}${T[r[0]].n}</span></td><td class="n" style="font-weight:600">${r[1]}</td><td class="n">${r[2]}</td><td class="n">${r[3]}</td></tr>`).join('')}</tbody></table></section>`;
 }
 const rankRows = () => RANK_PLAYERS.map(([n, p]) => ({ n, p, t: p.reduce((a, x) => a + ptsFor(x), 0), e: p.filter(Boolean).length })).sort((a, b) => b.t - a.t);
-const medalPos = i => i < 3 ? medal(12, ['gold', 'silver', 'bronze'][i], '#003057', '#C8F04A') : `<span class="mut num">${i + 1}</span>`;
+const medalPos = i => `<span class="posn num ${['p1', 'p2', 'p3'][i] || ''}">${i + 1}</span>`;
 function classTru3() {
   return `<section class="panel"><div class="tscroll"><table class="wt"><thead><tr><th scope="col" style="width:40px">#</th><th scope="col">Dupla</th><th scope="col">Como chegou à posição</th><th scope="col" class="n">Pontos por atleta</th></tr></thead><tbody>
   ${ETAPA3.map(r => `<tr><td>${medalPos(r.pos - 1)}</td><td><span class="pcell">${duo(r.d.a, r.d.b, 24)}${r.d.n.replace('&', 'e')}</span></td><td class="mut">${r.how}</td><td class="n" style="font-weight:600">${ptsFor(r.pos)}</td></tr>`).join('')}</tbody></table></div></section>`;
@@ -267,20 +271,20 @@ function teamsTable(id) {
 /* ---------- Resumo de cada campeonato ---------- */
 function resumo(id) {
   const kp = arr => `<div class="kpis">${arr.map(([v, l, s]) => `<div class="kpi"><b class="num">${v}</b><span>${l}</span>${s ? `<small>${s}</small>` : ''}</div>`).join('')}</div>`;
-  const prog = `<section class="panel"><h2 style="margin-bottom:16px">Andamento</h2>${campSteps(CAMPS[id])}</section>`;
+  const prog = '';
   if (id === 'fut') {
     const gols = FUT_GAMES.reduce((a, g) => a + g[1] + g[3], 0), j = S.jogos, played = 12 + (j.saved1 ? 1 : 0) + (j.saved2 ? 1 : 0);
     const lead = [...FUT_GROUPS.A, ...FUT_GROUPS.B].sort((a, b) => b[6] - a[6] || b[5] - a[5]).slice(0, 4);
     return `${prog}${kp([['8', 'equipes', '56 atletas'], [`${played}/16`, 'jogos disputados'], [gols, 'gols', `${(gols / 12).toFixed(1).replace('.', ',')} por jogo`], ['22 mai', 'final']])}
     <div class="cols">
-      <section class="panel"><div class="phd"><h2>Quem está na frente</h2>${wb('Classificação completa', 'data-act="camp-tab" data-c="fut" data-v="class"', 'sec', 'podium')}</div>
-        <table class="wt"><thead><tr><th scope="col" style="width:40px">#</th><th scope="col">Equipe</th><th class="n" scope="col">Pts</th><th class="n" scope="col">SG</th><th scope="col">Situação</th></tr></thead><tbody>
-        ${lead.map((r, i) => `<tr><td>${medalPos(i)}</td><td><span class="pcell">${cr(r[0], 22)}${T[r[0]].n}</span></td><td class="n" style="font-weight:600">${r[6]}</td><td class="n">${r[5] > 0 ? '+' : ''}${r[5]}</td><td class="mut">Na semifinal</td></tr>`).join('')}</tbody></table></section>
-      <section class="panel"><h2 style="margin-bottom:4px">Próximos jogos</h2>
-        ${[['sf1', 'CAB', 'CMP', '10:00', j.saved1], ['sf2', 'ONI', 'MOT', '11:30', j.saved2]].map(([k, a, b, h, sv]) => `<div class="todo"><div class="m"><b>${T[a].n} × ${T[b].n}</b><span>Semifinal · sáb, 15 mai · ${h} · Campo 1</span></div>${sv ? `<span class="saved">${ic('check', 16, 2.4)}${S.jogos[k][0]} × ${S.jogos[k][1]}</span>` : wb('Lançar', 'data-act="camp-tab" data-c="fut" data-v="jogos"', 'sec', 'score')}</div>`).join('')}
-        <div class="todo"><div class="m"><b>Final e 3º lugar</b><span>Sáb, 22 mai · 08:30 e 10:00 · Campo 1</span></div></div>
-        <h2 style="margin:20px 0 4px">Últimos resultados</h2>
-        ${FUT_GAMES.slice(-4).reverse().map(([a, x, b, y, dt]) => `<div class="todo"><div class="m"><b>${T[a].n} ${x} × ${y} ${T[b].n}</b><span>Grupo ${FUT_GROUPS.A.some(r => r[0] === a) ? 'A' : 'B'} · ${dt}</span></div></div>`).join('')}</section>
+      <section class="panel"><div class="phd"><h2>Quem está na frente</h2><button class="lnk2" data-act="camp-tab" data-c="fut" data-v="class">Classificação completa ${ic('arrowR', 14, 2.2)}</button></div>
+        <table class="wt lead2"><thead><tr><th scope="col" style="width:44px"><span class="sr">Posição</span></th><th scope="col">Equipe</th><th class="n" scope="col">J</th><th class="n" scope="col">SG</th><th class="n" scope="col">Pts</th></tr></thead><tbody>
+        ${lead.map((r, i) => `<tr><td>${medalPos(i)}</td><td><span class="pcell">${cr(r[0], 26)}<span><b class="tn">${T[r[0]].n}</b><small class="mut">Grupo ${FUT_GROUPS.A.includes(r) ? 'A' : 'B'} · na semifinal</small></span></span></td><td class="n mut">${r[1]}</td><td class="n mut">${r[5] > 0 ? '+' : ''}${r[5]}</td><td class="n pts2">${r[6]}</td></tr>`).join('')}</tbody></table></section>
+      <section class="panel"><div class="phd"><h2>Agenda</h2><button class="lnk2" data-act="camp-tab" data-c="fut" data-v="jogos">Todos os jogos ${ic('arrowR', 14, 2.2)}</button></div>
+        ${[['sf1', 'CAB', 'CMP', '10:00', j.saved1], ['sf2', 'ONI', 'MOT', '11:30', j.saved2]].map(([k, a, b, h, sv]) => `<div class="ag2"><span class="dt sm"><b class="num">15</b><span>mai</span></span><div class="m"><b>${T[a].n} <i>×</i> ${T[b].n}</b><span>Semifinal · ${h} · Campo 1</span></div>${sv ? `<span class="sc2 num">${S.jogos[k][0]}<i>–</i>${S.jogos[k][1]}</span>` : `<button class="lnk2 strong" data-act="camp-tab" data-c="fut" data-v="class">Lançar</button>`}</div>`).join('')}
+        <div class="ag2"><span class="dt sm muted"><b class="num">22</b><span>mai</span></span><div class="m"><b>Final e disputa de 3º</b><span>08:30 e 10:00 · Campo 1</span></div></div>
+        <h3 class="h3s">Últimos resultados</h3>
+        ${FUT_GAMES.slice(-4).reverse().map(([a, x, b, y, dt]) => `<div class="res2"><span class="r-a">${T[a].n}${cr(a, 18)}</span><span class="sc2 num">${x}<i>–</i>${y}</span><span class="r-b">${cr(b, 18)}${T[b].n}</span><span class="mut r-d">${dt}</span></div>`).join('')}</section>
     </div>`;
   }
   if (id === 'tru4') {
@@ -307,8 +311,8 @@ function resumo(id) {
   }
   const top = ETAPA3.slice(0, 3);
   return `${prog}${kp([['28', 'duplas'], ['54', 'jogos'], ['23 abr', 'encerrada'], ['30', 'pontos para os campeões']])}
-  <section class="panel"><div class="phd"><h2>Pódio</h2>${wb('Classificação completa', 'data-act="camp-tab" data-c="tru3" data-v="class"', 'sec', 'podium')}</div>
-  <div class="wpod">${top.map((r, i) => `<div class="wp wp-${i}">${medal(18, ['gold', 'silver', 'bronze'][i], '#003057', '#C8F04A')}${duo(r.d.a, r.d.b, 40)}<b>${r.d.n.replace('&', 'e')}</b><span>${r.how} · ${ptsFor(r.pos)} pts cada</span></div>`).join('')}</div></section>`;
+  <section class="panel"><div class="phd"><h2>Pódio</h2><button class="lnk2" data-act="camp-tab" data-c="tru3" data-v="class">Classificação completa ${ic('arrowR', 14, 2.2)}</button></div>
+  ${podium(top.map((r, i) => ({ av: duo(r.d.a, r.d.b, i ? 48 : 56), short: r.d.n.replace(' & ', ' e '), pts: [ptsFor(r.pos), 'pts cada'], sub: r.how })), 'Etapa 3 · 28 duplas · 23 abr')}</section>`;
 }
 
 WEB['web-camp'] = () => {
