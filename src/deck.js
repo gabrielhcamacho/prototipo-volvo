@@ -94,7 +94,7 @@ function deckHTML() {
     <div class="rk-c"><h3>Ranking</h3><p>No truco, cada etapa soma pontos pela colocação até a décima. No futebol e no vôlei, vitórias, empates e saldo.</p>${phoneShot('app-ranking', .62, null, 0, [6, 22, -6])}</div>
   </section>
 
-  <div class="pan"><div class="pan-bg" aria-hidden="true"><div class="pan-img" style="${bg('stadium')}"></div><i class="pan-shade"></i></div>
+  <div class="pan"><div class="pan-bg" aria-hidden="true">${['stadium', 'cards', 'ball', 'trophy'].map((k, n) => `<div class="pan-img" data-n="${n}" style="${bg(k)}"></div>`).join('')}<i class="pan-shade"></i></div>
   <section class="x-nt" id="s-painel">
     <div class="nt-t">${kick('No computador')}<h2>A associação cria, organiza <br>e publica pelo painel.</h2></div>
     <div class="nt-mac">${macShot('web-painel', 1000, null, 0, [10, 0])}</div>
@@ -248,14 +248,16 @@ function setMode(m) {
 function fitShots() {
   const vw = document.documentElement.clientWidth;
   document.querySelectorAll('#deck .shot, #deck .mac').forEach(el => {
-    el.style.zoom = '';
+    el.style.transform = ''; el.style.margin = ''; el.style.zoom = '';
     const box = el.closest('.sl-ph,.fr-v,.mcell,.nt-mac,.hx-ph,.rk-c') || el.parentElement;
     const group = el.closest('.sl-ph,.fr-v');
     let avail = Math.min(box.clientWidth || vw, vw - 32);
     if (group && vw >= 760) { const tot = [...group.children].reduce((a, c) => a + (parseFloat(c.style.width) || c.offsetWidth), 0) + 40 * (group.children.length - 1); if (tot > group.clientWidth) avail = (parseFloat(el.style.width) || el.offsetWidth) * group.clientWidth / tot; }
     if (group && vw < 760) avail = (vw - 40 - 12 * (group.children.length - 1)) / group.children.length;
     const w = (parseFloat(el.style.width) || el.offsetWidth) * (el.classList.contains('mac') ? 1.04 : el.classList.contains('flat') ? 1.5 : 1.15);
-    if (w > avail) el.style.zoom = (avail / w).toFixed(3);
+    if (w > avail) { const k = avail / w, ow = parseFloat(el.style.width) || el.offsetWidth, oh = parseFloat(el.style.height) || el.offsetHeight;
+      el.style.transform = `scale(${k.toFixed(3)})`; el.style.transformOrigin = 'top center';
+      el.style.margin = `0 ${(-(1 - k) * ow / 2).toFixed(1)}px ${(-(1 - k) * oh).toFixed(1)}px`; }
   });
 }
 let fitT; window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(() => { if (document.body.classList.contains('deck-on')) fitShots(); }, 120); });
@@ -263,10 +265,12 @@ function fixShots() { document.querySelectorAll('#deck .shot-in[data-sy]').forEa
 function panScroll() {
   const p = document.querySelector('.pan'); if (!p || !document.body.classList.contains('deck-on')) return;
   const r = p.getBoundingClientRect(), vh = innerHeight, t = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)));
-  const img = p.querySelector('.pan-img'), sh = p.querySelector('.pan-shade');
-  img.style.transform = `scale(${1.08 + t * .22}) translate(${(t - .5) * -4}%, ${t * 6}%)`;
-  img.style.filter = `brightness(${.8 + Math.sin(t * Math.PI) * .25}) saturate(${1 + t * .15})`;
-  sh.style.opacity = (.55 - Math.sin(t * Math.PI * 2.5) * .12).toFixed(3);
+  const imgs = p.querySelectorAll('.pan-img'), n = imgs.length, f = t * (n - 1);
+  imgs.forEach((img, k) => {
+    const d = Math.abs(f - k), o = Math.max(0, Math.min(1, 1.6 - d * 1.6));
+    img.style.opacity = o.toFixed(3);
+    img.style.transform = `scale(${(1.06 + (f - k + 1) * .05).toFixed(3)})`;
+  });
 }
 function revealInit() {
   window.addEventListener('scroll', () => requestAnimationFrame(panScroll), { passive: true }); panScroll();
