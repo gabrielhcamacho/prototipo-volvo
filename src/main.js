@@ -45,11 +45,15 @@ function render(keepScroll) {
 /* no celular, o painel web é mostrado inteiro, reduzido para caber */
 function fitDevice() {
   const d = document.querySelector('#device > .rph, #device > .browser'); if (!d) return;
-  d.style.zoom = '';
-  const w = document.getElementById('device').clientWidth;
+  d.style.zoom = ''; d.style.transform = ''; d.style.margin = ''; d.style.width = ''; d.style.maxWidth = '';
+  const dev = document.getElementById('device'), w = dev.clientWidth;
   const hz = document.body.classList.contains('touring') ? (innerHeight - 64 - 90 - 150) : 1e5;
-  if (d.classList.contains('browser')) { d.style.width = '1200px'; d.style.maxWidth = 'none'; const z = Math.min(w / 1200, hz / 800); if (z < 1) d.style.zoom = z.toFixed(3); else { d.style.width = ''; d.style.maxWidth = ''; } }
-  else { const z = Math.min(w / 440, hz / 842); if (z < 1) d.style.zoom = z.toFixed(3); }
+  const web = d.classList.contains('browser'), bw = web ? 1200 : 420, bh = web ? d.offsetHeight || 800 : 842;
+  if (web) { d.style.width = '1200px'; d.style.maxWidth = 'none'; }
+  const z = Math.min(w / (web ? 1200 : 440), hz / (web ? 800 : 842));
+  if (z < 1) { d.style.transform = `scale(${z.toFixed(4)})`; d.style.transformOrigin = 'top left';
+    d.style.marginRight = `${(-(1 - z) * bw).toFixed(1)}px`; d.style.marginBottom = `${(-(1 - z) * (web ? d.offsetHeight : bh)).toFixed(1)}px`; d.style.alignSelf = web ? 'flex-start' : 'center'; }
+  else if (web) { d.style.width = ''; d.style.maxWidth = ''; }
 }
 let fdW = innerWidth; window.addEventListener('resize', () => { if (innerWidth === fdW && !document.body.classList.contains('touring')) return; fdW = innerWidth; if (!document.body.classList.contains('deck-on')) fitDevice(); });
 function navigate(id, push = true) {
