@@ -19,7 +19,7 @@ const SHOT_SRC = {};
 /* iPhone real (moldura Apple, titânio preto) com espessura em 3D; pose = rotações em graus */
 const PW = 420, PH = 842;
 function phoneBody(id, setup) {
-  const D = 26, layers = [...Array(D / 2)].map((_, k) => `<i class="ed" style="transform:translateZ(${-(k + 1) * 2}px)"></i>`).join('');
+  const D = 14, layers = [6, 10].map(z => `<i class="ed" style="transform:translateZ(${-z}px)"></i>`).join('');
   return `<div class="i3">${layers}<i class="ed bk" style="transform:translateZ(${-D}px)"></i>
     <div class="dv-scr">${withState(setup, () => phoneHTML(id))}</div><img class="dv-frame" src="${DEV.iphone}" alt=""><i class="dglass"></i></div>`;
 }
@@ -260,12 +260,12 @@ function fitShots() {
       el.style.margin = `0 ${(-(1 - k) * ow / 2).toFixed(1)}px ${(-(1 - k) * oh).toFixed(1)}px`; }
   });
 }
-let fitT; window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(() => { if (document.body.classList.contains('deck-on')) fitShots(); }, 120); });
+let fitT, fitW = innerWidth; window.addEventListener('resize', () => { if (innerWidth === fitW) return; fitW = innerWidth; clearTimeout(fitT); fitT = setTimeout(() => { if (document.body.classList.contains('deck-on')) fitShots(); }, 120); });
 function fixShots() { document.querySelectorAll('#deck .shot-in[data-sy]').forEach(el => { const y = +el.dataset.sy; if (y) { const v = el.querySelector('.view, .wmain'); if (v) v.scrollTop = y; } }); }
 function panScroll() {
   const p = document.querySelector('.pan'); if (!p || !document.body.classList.contains('deck-on')) return;
   const r = p.getBoundingClientRect(), vh = innerHeight, t = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)));
-  const imgs = p.querySelectorAll('.pan-img'), n = imgs.length, f = t * (n - 1);
+  const imgs = [...p.querySelectorAll('.pan-img')].filter(i => getComputedStyle(i).display !== 'none'), n = imgs.length, f = t * (n - 1);
   imgs.forEach((img, k) => {
     const d = Math.abs(f - k), o = Math.max(0, Math.min(1, 1.6 - d * 1.6));
     img.style.opacity = o.toFixed(3);

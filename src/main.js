@@ -51,7 +51,7 @@ function fitDevice() {
   if (d.classList.contains('browser')) { d.style.width = '1200px'; d.style.maxWidth = 'none'; const z = Math.min(w / 1200, hz / 800); if (z < 1) d.style.zoom = z.toFixed(3); else { d.style.width = ''; d.style.maxWidth = ''; } }
   else { const z = Math.min(w / 440, hz / 842); if (z < 1) d.style.zoom = z.toFixed(3); }
 }
-window.addEventListener('resize', () => { if (!document.body.classList.contains('deck-on')) fitDevice(); });
+let fdW = innerWidth; window.addEventListener('resize', () => { if (innerWidth === fdW && !document.body.classList.contains('touring')) return; fdW = innerWidth; if (!document.body.classList.contains('deck-on')) fitDevice(); });
 function navigate(id, push = true) {
   if (!NOTES[id]) return;
   if (push && id !== S.screen) S.hist.push(S.screen);

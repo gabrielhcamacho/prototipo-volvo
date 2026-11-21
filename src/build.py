@@ -24,8 +24,8 @@ import json
 def dimgs():
     out={}
     for g in sorted(glob.glob(str(d/'assets'/'deck'/'*'))):
-        im=Image.open(g).convert('RGB'); w,h=im.size; s=min(1.0,2000/w); im=im.resize((int(w*s),int(h*s)),Image.LANCZOS)
-        buf=io.BytesIO(); im.save(buf,'JPEG',quality=74,optimize=True,progressive=True)
+        im=Image.open(g).convert('RGB'); w,h=im.size; s=min(1.0,1600/w); im=im.resize((int(w*s),int(h*s)),Image.LANCZOS)
+        buf=io.BytesIO(); im.save(buf,'JPEG',quality=70,optimize=True,progressive=True)
         out[Path(g).stem]='data:image/jpeg;base64,'+base64.b64encode(buf.getvalue()).decode()
     return out
 def devs():
